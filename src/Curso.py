@@ -1,101 +1,106 @@
+from typing import List, Optional, Union
 from .Disciplina import Disciplina
+from .Pessoa import Pessoa
 from .Aluno import Aluno
 from .Professor import Professor
 
 class Curso:
-    def __init__(self, codigo, nome):
-        self.codigo = codigo
-        self.nome = nome
-        self.disciplinas = []
-        self.alunos = []
-        self.professores = []
+    """
+    Representa um curso da universidade.
+    """
+    def __init__(self, codigo: str, nome: str):
+        self._codigo = codigo
+        self._nome = nome
+        self._disciplinas: List[Disciplina] = []
+        self._alunos: List[Aluno] = []
+        self._professores: List[Professor] = []
 
-    def adicionar_exemplo_disciplina(self):
+    @property
+    def codigo(self) -> str:
+        return self._codigo
+
+    @property
+    def nome(self) -> str:
+        return self._nome
+    
+    @nome.setter
+    def nome(self, novo_nome: str) -> None:
+        self._nome = novo_nome
+
+    @property
+    def disciplinas(self) -> List[Disciplina]:
+        return self._disciplinas
+
+    @property
+    def alunos(self) -> List[Aluno]:
+        return self._alunos
+
+    @property
+    def professores(self) -> List[Professor]:
+        return self._professores
+
+    def adicionar_exemplo_disciplina(self) -> None:
         disciplina_poo = Disciplina("004", "Programação Orientada a Objetos", 64)
-        self.disciplinas.append(disciplina_poo)
+        self.adicionar_disciplina(disciplina_poo)
 
-    def adicionar_disciplina(self):
-        codigo = input("Código da disciplina: ")
-        nome = input("Nome da disciplina: ")
-        horas = int(input("Carga horária: "))
+    def adicionar_disciplina(self, disciplina: Disciplina) -> None:
+        self._disciplinas.append(disciplina)
+        print("Disciplina adicionada com sucesso.")
 
-        disciplina = Disciplina(codigo, nome, horas)
-        self.disciplinas.append(disciplina)
-
-        print("Disciplina adicionada:")
-        disciplina.imprimir_informacoes()
-
-    def remover_disciplina(self):
-        codigo = input("Código da disciplina a remover: ")
-        self.disciplinas = [d for d in self.disciplinas if d.codigo != codigo]
-
-    def editar_disciplina(self):
-        codigo = input("Código da disciplina a editar: ")
-        for d in self.disciplinas:
+    def remover_disciplina(self, codigo: str) -> bool:
+        """Remove uma disciplina pelo código. Retorna True se removeu, False se não encontrou."""
+        for d in self._disciplinas:
             if d.codigo == codigo:
-                d.nome = input("Novo nome: ") or d.nome
-                d.quantidade_horas = int(input("Nova carga horária: "))
-                print("Disciplina atualizada.")
-                return
-        print("Disciplina não encontrada.")
+                self._disciplinas.remove(d)
+                return True
+        return False
 
-    def imprimir_disciplinas(self):
-        if not self.disciplinas:
+    def buscar_disciplina(self, codigo: str) -> Optional[Disciplina]:
+        for d in self._disciplinas:
+            if d.codigo == codigo:
+                return d
+        return None
+
+    def imprimir_disciplinas(self) -> None:
+        if not self._disciplinas:
             print("Nenhuma disciplina cadastrada.")
             return
 
         print(f"=== Disciplinas do curso {self.nome} ===")
-        for d in self.disciplinas:
+        for d in self._disciplinas:
             d.imprimir_informacoes()
 
-    def informacoes_curso(self):
+    def informacoes_curso(self) -> None:
         print(f"Curso {self.nome} - Código {self.codigo}")
 
-    def adicionar_pessoa(self):
-        tipo = input("Cadastrar [A]luno ou [P]rofessor? ").strip().upper()
-        identificador = input("Identificador (matrícula ou SIAPE): ")
-        nome = input("Nome: ")
-        cpf = input("CPF: ")
-        nascimento = input("Data de nascimento: ")
-        email = input("Email: ")
-        
-        if tipo == "A":
-            periodo = input("Período do aluno: ")
-            pessoa = Aluno(identificador, nome, cpf, nascimento, email, self.nome, periodo)
-            self.alunos.append(pessoa)
+    def adicionar_pessoa(self, pessoa: Union[Aluno, Professor]) -> None:
+        if isinstance(pessoa, Aluno):
+            self._alunos.append(pessoa)
             print("Aluno cadastrado com sucesso!")
-        elif tipo == "P":
-            departamento = input("Departamento: ")
-            titulacao = input("Titulação: ")
-            pessoa = Professor(identificador, nome, cpf, nascimento, email, departamento, titulacao)
-            self.professores.append(pessoa)
+        elif isinstance(pessoa, Professor):
+            self._professores.append(pessoa)
             print("Professor cadastrado com sucesso!")
         else:
-            print("Tipo inválido.")
+            print("Tipo de pessoa inválido para este curso.")
 
-    def listar_pessoas(self):
+    def listar_pessoas(self) -> None:
         print("=== Alunos ===")
-        if not self.alunos:
+        if not self._alunos:
             print("Nenhum aluno cadastrado.")
-        for aluno in self.alunos:
+        for aluno in self._alunos:
             print(f"{aluno.identificador} - {aluno.nome}")
 
         print("=== Professores ===")
-        if not self.professores:
+        if not self._professores:
             print("Nenhum professor cadastrado.")
-        for prof in self.professores:
+        for prof in self._professores:
             print(f"{prof.identificador} - {prof.nome}")
 
-    def detalhes_pessoa(self):
-        ident = input("Informe o identificador da pessoa: ")
-        for aluno in self.alunos:
-            if aluno.identificador == ident:
-                aluno.exibir_dados()
-                return
-        for prof in self.professores:
-            if prof.identificador == ident:
-                prof.exibir_dados()
-                return
-        print("Pessoa não encontrada.")
-
-
+    def buscar_pessoa(self, identificador: str) -> Optional[Union[Aluno, Professor]]:
+        for aluno in self._alunos:
+            if aluno.identificador == identificador:
+                return aluno
+        for prof in self._professores:
+            if prof.identificador == identificador:
+                return prof
+        return None
